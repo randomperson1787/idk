@@ -71,38 +71,16 @@ class $modify(VTPSPlayLayer, PlayLayer) {
         s_initialized2 = false;
         PlayLayer::onQuit();
     }
-};
 
-class $modify(VTPSPlayerObject, PlayerObject) {
-    void draw() {
-        if (!s_inLevel) {
-            PlayerObject::draw();
+    void visit() {
+        if (!s_inLevel || !m_player1) {
+            PlayLayer::visit();
             return;
         }
 
         auto* mod = Mod::get();
         if (!mod->getSettingValue<bool>("enabled")) {
-            PlayerObject::draw();
-            return;
-        }
-
-        auto* pl = PlayLayer::get();
-        if (!pl) {
-            PlayerObject::draw();
-            return;
-        }
-
-        bool isP1 = (this == pl->m_player1);
-        bool isP2 = (this == pl->m_player2);
-
-        if ((!isP1 && !isP2)) {
-            PlayerObject::draw();
-            return;
-        }
-
-        bool initialized = isP1 ? s_initialized1 : s_initialized2;
-        if (!initialized) {
-            PlayerObject::draw();
+            PlayLayer::visit();
             return;
         }
 
@@ -116,25 +94,44 @@ class $modify(VTPSPlayerObject, PlayerObject) {
         float snapped = (float)((int)(alpha / (visualInterval / PHYSICS_RATE))) * (visualInterval / PHYSICS_RATE);
         if (snapped > 1.f) snapped = 1.f;
 
-        cocos2d::CCPoint prev = isP1 ? s_prevPos1 : s_prevPos2;
-        cocos2d::CCPoint curr = isP1 ? s_currPos1 : s_currPos2;
-        float prevR = isP1 ? s_prevRot1 : s_prevRot2;
-        float currR = isP1 ? s_currRot1 : s_currRot2;
+        // Save real positions
+        auto realPos1 = m_player1->getPosition();
+        auto realRot1 = m_player1->getRotation();
 
-        cocos2d::CCPoint interpPos = {
-            prev.x + (curr.x - prev.x) * snapped,
-            prev.y + (curr.y - prev.y) * snapped
+        // Apply interpolated position
+        cocos2d::CCPoint interpPos1 = {
+            s_prevPos1.x + (s_currPos1.x - s_prevPos1.x) * snapped,
+            s_prevPos1.y + (s_currPos1.y - s_prevPos1.y) * snapped
         };
-        float interpRot = prevR + (currR - prevR) * snapped;
+        float interpRot1 = s_prevRot1 + (s_currRot1 - s_prevRot1) * snapped;
 
-        auto realPos = this->getPosition();
-        auto realRot = this->getRotation();
+        m_player1->setPosition(interpPos1);
+        m_player1->setRotation(interpRot1);
 
-        this->setPosition(interpPos);
-        this->setRotation(interpRot);
-        PlayerObject::draw();
-        this->setPosition(realPos);
-        this->setRotation(realRot);
+        if (m_player2 && s_initialized2) {
+            auto realPos2 = m_player2->getPosition();
+            auto realRot2 = m_player2->getRotation();
+
+            cocos2d::CCPoint interpPos2 = {
+                s_prevPos2.x + (s_currPos2.x - s_prevPos2.x) * snapped,
+                s_prevPos2.y + (s_currPos2.y - s_prevPos2.y) * snapped
+            };
+            float interpRot2 = s_prevRot2 + (s_currRot2 - s_prevRot2) * snapped;
+
+            m_player2->setPosition(interpPos2);
+            m_player2->setRotation(interpRot2);
+
+            PlayLayer::visit();
+
+            m_player2->setPosition(realPos2);
+            m_player2->setRotation(realRot2);
+        } else {
+            PlayLayer::visit();
+        }
+
+        // Restore real positions
+        m_player1->setPosition(realPos1);
+        m_player1->setRotation(realRot1);
     }
 };
 
