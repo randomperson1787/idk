@@ -1,0 +1,28 @@
+{
+	"geode": "3.0.0",
+	"gd": {
+		"win": "2.206",
+		"android": "2.206"
+	},
+	"id": "yourname.visualtps",
+	"name": "Visual TPS",
+	"version": "v1.0.0",
+	"developer": "yourname",
+	"description": "Makes the icon visually move at a custom TPS without changing actual game physics.",
+	"settings": {
+		"visual-tps": {
+			"name": "Visual TPS",
+			"description": "The TPS the icon will visually move at. Higher = smoother, lower = wobbly.",
+			"type": "int",
+			"default": 240,
+			"min": 1,
+			"max": 10000
+		},
+		"enabled": {
+			"name": "Enable Visual TPS",
+			"description": "Toggle the visual TPS effect on or off.",
+			"type": "bool",
+			"default": true
+		}
+	}
+}
