@@ -8,27 +8,28 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         config:
           - name: Windows
             os: windows-latest
-            target: win
-          - name: Android
-            os: ubuntu-latest
-            target: android64
 
-    name: Build (${{ matrix.config.name }})
+          - name: Android64
+            os: ubuntu-latest
+            target: Android64
+
+    name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build
+      - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
         id: build
         with:
+          combine: true
           target: ${{ matrix.config.target }}
-          sdk: latest
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
