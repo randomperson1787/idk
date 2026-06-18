@@ -13,9 +13,6 @@ else()
     message(STATUS "Found Geode SDK at $ENV{GEODE_SDK}")
 endif()
 
-set(CPM_USE_LOCAL_PACKAGES OFF)
-set(GEODE_DISABLE_FMT_CONSTEVAL ON)
-
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 add_library(${PROJECT_NAME} SHARED
